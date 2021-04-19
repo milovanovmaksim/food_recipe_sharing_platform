@@ -9,6 +9,7 @@ from models.user import User
 from models.recipe import Recipe
 from config import config
 from extensions import db
+from resources.user import UserListResource
 from resources.recipe import RecipeListResource, RecipeResource, RecipePublishResource
 
 
@@ -27,6 +28,7 @@ def register_extensions(app):
 
 def register_resource(app):
     api = Api(app)
+    api.add_resource(UserListResource, '/users')
     api.add_resource(RecipeListResource, '/recipes')
     api.add_resource(RecipeResource, '/recipes/<int:recipe_id>')
     api.add_resource(RecipePublishResource, '/recipes/<int:recipe_id>/publish')
@@ -45,5 +47,4 @@ manager.add_command('db', MigrateCommand)
 
 
 if __name__ == '__main__':
-
     manager.run()
