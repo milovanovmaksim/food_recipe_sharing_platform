@@ -8,9 +8,10 @@ from flask_script import Manager, Shell
 from models.user import User
 from models.recipe import Recipe
 from config import config
-from extensions import db
-from resources.user import UserListResource
+from extensions import db, jwt
+from resources.user import UserListResource, UserResource
 from resources.recipe import RecipeListResource, RecipeResource, RecipePublishResource
+from resources.token import TokenResource
 
 
 def create_app(config_name):
@@ -24,14 +25,17 @@ def create_app(config_name):
 def register_extensions(app):
     db.init_app(app)
     migrate = Migrate(app, db)
+    jwt.init_app(app)
 
 
 def register_resource(app):
     api = Api(app)
     api.add_resource(UserListResource, '/users')
+    api.add_resource(UserResource, '/users/<string:username>')
     api.add_resource(RecipeListResource, '/recipes')
     api.add_resource(RecipeResource, '/recipes/<int:recipe_id>')
     api.add_resource(RecipePublishResource, '/recipes/<int:recipe_id>/publish')
+    api.add_resource(TokenResource, '/token')
 
 
 def make_shell_context():
@@ -47,4 +51,4 @@ manager.add_command('db', MigrateCommand)
 
 
 if __name__ == '__main__':
-    manager.run()
+    app.run()
