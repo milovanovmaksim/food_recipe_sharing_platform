@@ -26,6 +26,11 @@ class User(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    @classmethod
+    def get_by_id(cls, id):
+        return cls.query.filter_by(id=id).first()
+
+
     @property
     def password(self):
         raise AttributeError('password is not a readable attribute')
