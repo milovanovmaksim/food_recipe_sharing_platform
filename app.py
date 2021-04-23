@@ -11,7 +11,7 @@ from config import config
 from extensions import db, jwt
 from resources.user import UserListResource, UserResource, MeResource
 from resources.recipe import RecipeListResource, RecipeResource, RecipePublishResource
-from resources.token import TokenResource
+from resources.token import TokenResource, RefreshResource
 
 
 def create_app(config_name):
@@ -37,6 +37,7 @@ def register_resource(app):
     api.add_resource(RecipeResource, '/recipes/<int:recipe_id>')
     api.add_resource(RecipePublishResource, '/recipes/<int:recipe_id>/publish')
     api.add_resource(TokenResource, '/token')
+    api.add_resource(RefreshResource, '/refresh')
 
 
 
