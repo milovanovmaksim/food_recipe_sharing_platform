@@ -1,7 +1,6 @@
 from extensions import db
 
 
-
 class Recipe(db.Model):
     __tablename__ = 'recipe'
 
@@ -36,15 +35,10 @@ class Recipe(db.Model):
     def get_by_id(cls, recipe_id):
         return cls.query.filter_by(id=recipe_id).first()
 
-
     def save(self):
         db.session.add(self)
         db.session.commit()
 
-
     def delete(self):
         db.session.delete(self)
         db.session.commit()
-
-
-

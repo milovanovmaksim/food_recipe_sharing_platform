@@ -11,7 +11,7 @@ from config import config
 from extensions import db, jwt
 from resources.user import UserListResource, UserResource, MeResource
 from resources.recipe import RecipeListResource, RecipeResource, RecipePublishResource
-from resources.token import TokenResource, RefreshResource
+from resources.token import TokenResource, RefreshResource, black_list, RevokeResource
 
 
 def create_app(config_name):
@@ -27,18 +27,26 @@ def register_extensions(app):
     migrate = Migrate(app, db)
     jwt.init_app(app)
 
+    @jwt.token_in_blocklist_loader
+    def check_if_token_in_blacklist(jwt_header, jwt_payload):
+        jti = jwt_payload['jti']
+        return jti in black_list
+
 
 def register_resource(app):
     api = Api(app)
     api.add_resource(UserListResource, '/users')
     api.add_resource(UserResource, '/users/<string:username>')
+
     api.add_resource(MeResource, '/me')
+
     api.add_resource(RecipeListResource, '/recipes')
     api.add_resource(RecipeResource, '/recipes/<int:recipe_id>')
     api.add_resource(RecipePublishResource, '/recipes/<int:recipe_id>/publish')
+
     api.add_resource(TokenResource, '/token')
     api.add_resource(RefreshResource, '/refresh')
-
+    api.add_resource(RevokeResource, '/revoke')
 
 
 def make_shell_context():
@@ -48,10 +56,8 @@ def make_shell_context():
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 manager = Manager(app)
 
-
 manager.add_command('shell', Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)
-
 
 if __name__ == '__main__':
     app.run()

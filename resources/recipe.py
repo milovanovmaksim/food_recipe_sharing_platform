@@ -4,7 +4,6 @@ from flask import request
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-
 from models.recipe import Recipe
 
 
@@ -16,7 +15,7 @@ class RecipeListResource(Resource):
         for recipe in recipes:
             data.append(recipe.data())
 
-        return {'data':data}, HTTPStatus.OK
+        return {'data': data}, HTTPStatus.OK
 
     @jwt_required()
     def post(self):
@@ -46,7 +45,6 @@ class RecipeResource(Resource):
             return {'message': 'Access is not allowed'}, HTTPStatus.FORBIDDEN
         return recipe.data(), HTTPStatus.OK
 
-
     @jwt_required()
     def put(self, recipe_id):
         json_data = request.get_json()
@@ -55,7 +53,7 @@ class RecipeResource(Resource):
             return {'message': 'recipe not found'}, HTTPStatus.NOT_FOUND
         current_user = get_jwt_identity()
         if current_user != recipe.user_id:
-            return{'message': 'Access is not allowed'}, HTTPStatus.FORBIDDEN
+            return {'message': 'Access is not allowed'}, HTTPStatus.FORBIDDEN
 
         recipe.name = json_data['name']
         recipe.description = json_data['description']
@@ -67,12 +65,12 @@ class RecipeResource(Resource):
 
     @jwt_required()
     def delete(self, recipe_id):
-        recipe =Recipe.get_by_id(recipe_id=recipe_id)
+        recipe = Recipe.get_by_id(recipe_id=recipe_id)
         if not recipe:
             return {'message': 'recipe not found'}, HTTPStatus.NOT_FOUND
         current_user = get_jwt_identity()
         if current_user != recipe.user_id:
-            return{'message': 'Access is not allowed'}, HTTPStatus.FORBIDDEN
+            return {'message': 'Access is not allowed'}, HTTPStatus.FORBIDDEN
         recipe.delete()
         return {}, HTTPStatus.NO_CONTENT
 
@@ -86,7 +84,7 @@ class RecipePublishResource(Resource):
             return {'message': 'recipe not found'}, HTTPStatus.NOT_FOUND
         current_user = get_jwt_identity()
         if current_user != recipe.user_id:
-            return{'message': 'Access is not allowed'}, HTTPStatus.FORBIDDEN
+            return {'message': 'Access is not allowed'}, HTTPStatus.FORBIDDEN
         recipe.is_publish = True
         recipe.save()
         return {}, HTTPStatus.NO_CONTENT
@@ -98,7 +96,7 @@ class RecipePublishResource(Resource):
             return {'message': 'recipe not found'}, HTTPStatus.NOT_FOUND
         current_user = get_jwt_identity()
         if current_user != recipe.user_id:
-            return{'message': 'Access is not allowed'}, HTTPStatus.FORBIDDEN
+            return {'message': 'Access is not allowed'}, HTTPStatus.FORBIDDEN
         recipe.is_publish = False
         recipe.save()
         return {}, HTTPStatus.NO_CONTENT
