@@ -45,29 +45,6 @@ class RecipeResource(Resource):
         return recipe_schema.dump(recipe), HTTPStatus.OK
 
     @jwt_required()
-    def put(self, recipe_id):
-        json_data = request.get_json()
-        recipe = Recipe.get_by_id(recipe_id=recipe_id)
-        if not recipe:
-            return {'message': 'recipe not found'}, HTTPStatus.NOT_FOUND
-        current_user = get_jwt_identity()
-        if current_user != recipe.user_id:
-            return {'message': 'Access is not allowed'}, HTTPStatus.FORBIDDEN
-
-        try:
-            data = recipe_schema.load(json_data)
-        except ValidationError as errors:
-            return {'message': 'Validation errors', 'errors': errors.messages}, HTTPStatus.BAD_REQUEST
-
-        recipe.name = data['name']
-        recipe.description = data['description']
-        recipe.num_of_servings = data['num_of_servings']
-        recipe.cook_time = data['cook_time']
-        recipe.directions = data['directions']
-        recipe.save()
-        return recipe_schema.dump(recipe), HTTPStatus.OK
-
-    @jwt_required()
     def delete(self, recipe_id):
         recipe = Recipe.get_by_id(recipe_id=recipe_id)
         if not recipe:
@@ -77,6 +54,28 @@ class RecipeResource(Resource):
             return {'message': 'Access is not allowed'}, HTTPStatus.FORBIDDEN
         recipe.delete()
         return {}, HTTPStatus.NO_CONTENT
+
+    @jwt_required()
+    def patch(self, recipe_id):
+        json_data = request.get_json()
+        try:
+            data = recipe_schema.load(data=json_data, partial=('name',))
+        except ValidationError as errors:
+            return {'message': 'Validation errors', 'errors': errors.messages}, HTTPStatus.BAD_REQUEST
+        recipe = Recipe.get_by_id(recipe_id=recipe_id)
+        if not recipe:
+            return {'message': 'Recipe not found'}, HTTPStatus.NOT_FOUND
+        current_user = get_jwt_identity()
+        if current_user != recipe.user_id:
+            return {'message': 'Access is not allowed'}, HTTPStatus.FORBIDDEN
+
+        recipe.name = data.get('name') or recipe.name
+        recipe.description = data.get('description') or recipe.description
+        recipe.num_of_servings = data.get('num_of_servings') or recipe.num_of_servings
+        recipe.cook_time = data.get('cook_time') or recipe.cook_time
+        recipe.directions = data.get('directions') or recipe.directions
+        recipe.save()
+        return recipe_schema.dump(recipe), HTTPStatus.OK
 
 
 class RecipePublishResource(Resource):
