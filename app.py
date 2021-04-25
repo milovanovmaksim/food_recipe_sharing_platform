@@ -9,7 +9,7 @@ from models.user import User
 from models.recipe import Recipe
 from config import config
 from extensions import db, jwt
-from resources.user import UserListResource, UserResource, MeResource
+from resources.user import UserListResource, UserResource, MeResource, UserRecipeListResource
 from resources.recipe import RecipeListResource, RecipeResource, RecipePublishResource
 from resources.token import TokenResource, RefreshResource, black_list, RevokeResource
 
@@ -37,6 +37,7 @@ def register_resource(app):
     api = Api(app)
     api.add_resource(UserListResource, '/users')
     api.add_resource(UserResource, '/users/<string:username>')
+    api.add_resource(UserRecipeListResource, '/users/<string:username>/recipes')
 
     api.add_resource(MeResource, '/me')
 
