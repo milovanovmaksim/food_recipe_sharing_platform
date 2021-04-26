@@ -23,7 +23,7 @@ class RecipeSchema(Schema):
     updated_at = fields.DateTime(dump_only=True)
     num_of_servings = fields.Integer(validate=validate_num_of_servings)
     cook_time = fields.Integer()
-    author = fields.Nested(UserSchema, attribute='user', dump_only=True, only=['id', 'username'])
+    author = fields.Nested(UserSchema, attribute='user', dump_only=True, exclude=('email', ))
 
     @validates('cook_time')
     def validate_cook_time(self, value):

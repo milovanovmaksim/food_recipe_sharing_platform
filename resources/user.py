@@ -68,12 +68,13 @@ class MeResource(Resource):
 
 class UserRecipeListResource(Resource):
     @jwt_required(optional=True)
-    @use_kwargs({'visibility': fields.Str(missing='public')})
+    @use_kwargs({'visibility': fields.Str(missing='public')}, location="query")
     def get(self, username, visibility):
         user = User.get_by_username(username=username)
         if not user:
             return {'message', 'User not found'}, HTTPStatus.NOT_FOUND
         current_user = get_jwt_identity()
+
         if current_user != user.id:
             visibility = 'public'
         recipes = Recipe.get_all_by_user(user_id=user.id, visibility=visibility)
