@@ -45,7 +45,8 @@ class UserListResource(Resource):
         self._send_link_by_email(user=user)
         return user_schema.dump(user), HTTPStatus.CREATED
 
-    def _send_link_by_email(self, user):
+    @staticmethod
+    def _send_link_by_email(user):
         token = generate_token(user.email, salt='activate')
         subject = 'Please confirm your registration.'
         link = url_for('useractivateresource', token=token, _external=True)
