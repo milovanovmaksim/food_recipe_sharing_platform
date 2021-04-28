@@ -53,7 +53,7 @@ class UserListResource(Resource):
         mailgun.send_email(to=user.email,
                            subject=subject,
                            text=text,
-                           html=render_template('sample.html', content=link))
+                           html=render_template('sample.html', content='Test email'))
 
 
 class UserResource(Resource):
