@@ -1,7 +1,7 @@
 from http import HTTPStatus
 from os import environ
 
-from flask import request, url_for
+from flask import request, url_for, render_template
 from flask_restful import Resource
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from marshmallow import ValidationError
@@ -50,7 +50,10 @@ class UserListResource(Resource):
         subject = 'Please confirm your registration.'
         link = url_for('useractivateresource', token=token, _external=True)
         text = f'Hi, Thanks for using SmileCook! Please confirm your registration by clicking on the link: {link}'
-        mailgun.send_email(to=user.email, subject=subject, text=text)
+        mailgun.send_email(to=user.email,
+                           subject=subject,
+                           text=text,
+                           html=render_template('sample.html', content=link))
 
 
 class UserResource(Resource):
