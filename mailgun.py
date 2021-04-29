@@ -18,6 +18,7 @@ class MailGunApi:
             'subject': subject,
             'text': text,
             'html': html
-        }
+            }
+
         response = requests.post(url=self.base_url, auth=('api', self.api_key), data=data)
         return response
