@@ -54,11 +54,15 @@ class UserListResource(Resource):
         token = generate_token(user.email, salt='activate')
         subject = 'Please confirm your registration.'
         link = url_for('useractivateresource', token=token, _external=True)
-        text = f'Hi, Thanks for using SmileCook! Please confirm your registration by clicking on the link: {link}'
+        html=render_template('mail/confirm' + '.html', link=link, username=user.username)
+        text = render_template('mail/confirm' + '.txt', link=link, username=user.username)
         mailgun.send_email(to=user.email,
                            subject=subject,
                            text=text,
-                           html=render_template('sample.html', content=text))
+                           html=html
+                           )
+
+
 
 
 class UserResource(Resource):
