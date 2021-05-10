@@ -10,14 +10,13 @@ from webargs import fields
 from webargs.flaskparser import use_kwargs
 
 from models.user import User
+from models.recipe import Recipe
+
 from schemas.user import UserSchema
 from schemas.recipe import RecipeSchema
 
-from models.recipe import Recipe
-
 from utils import generate_token, verify_token, save_image
 from mailgun import MailGunApi
-
 from extensions import image_set
 
 user_schema = UserSchema()

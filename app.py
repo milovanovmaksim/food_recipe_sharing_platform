@@ -8,8 +8,10 @@ from flask_uploads import configure_uploads, patch_request_class
 
 from models.user import User
 from models.recipe import Recipe
+
 from config import config
 from extensions import db, jwt, image_set
+
 from resources.user import UserListResource, UserResource, MeResource,\
     UserRecipeListResource, UserActivateResource, UserAvatarUploadResource
 from resources.recipe import RecipeListResource, RecipeResource, RecipePublishResource
