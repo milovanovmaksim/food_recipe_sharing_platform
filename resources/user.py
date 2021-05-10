@@ -20,10 +20,9 @@ from mailgun import MailGunApi
 
 from extensions import image_set
 
-
 user_schema = UserSchema()
 user_public_schema = UserSchema(exclude=('email',))
-user_avatar_schema = UserSchema(only=('avatar_url', ))
+user_avatar_schema = UserSchema(only=('avatar_url',))
 
 recipe_list_schema = RecipeSchema(many=True)
 
@@ -54,15 +53,13 @@ class UserListResource(Resource):
         token = generate_token(user.email, salt='activate')
         subject = 'Please confirm your registration.'
         link = url_for('useractivateresource', token=token, _external=True)
-        html=render_template('mail/confirm' + '.html', link=link, username=user.username)
+        html = render_template('mail/confirm' + '.html', link=link, username=user.username)
         text = render_template('mail/confirm' + '.txt', link=link, username=user.username)
         mailgun.send_email(to=user.email,
                            subject=subject,
                            text=text,
                            html=html
                            )
-
-
 
 
 class UserResource(Resource):
@@ -135,4 +132,3 @@ class UserAvatarUploadResource(Resource):
         user.avatar_image = filename
         user.save()
         return user_avatar_schema.dump(user), HTTPStatus.OK
-
