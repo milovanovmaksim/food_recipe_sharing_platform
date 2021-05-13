@@ -118,6 +118,7 @@ class UserAvatarUploadResource(Resource):
     @jwt_required()
     def put(self):
         file = request.files.get("avatar")
+        print(request.files)
         if not file:
             return {'message': 'Not a valid image'}, HTTPStatus.BAD_REQUEST
         if not image_set.file_allowed(file, file.filename):
