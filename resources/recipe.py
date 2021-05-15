@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from os import path, remove
 
 from flask import request
 from flask_restful import Resource
@@ -7,9 +8,13 @@ from marshmallow import ValidationError
 
 from models.recipe import Recipe
 from schemas.recipe import RecipeSchema
+from extensions import image_set
+from utils import save_image
+
 
 recipe_schema = RecipeSchema()
 recipe_list_schema = RecipeSchema(many=True)
+recipe_cover_schema = RecipeSchema(only=('cover_url',))
 
 
 class RecipeListResource(Resource):
@@ -103,3 +108,32 @@ class RecipePublishResource(Resource):
         recipe.is_publish = False
         recipe.save()
         return {}, HTTPStatus.NO_CONTENT
+
+
+class RecipeCoverUploadResource(Resource):
+    @jwt_required()
+    def put(self, recipe_id):
+        file = request.files.get('cover')
+        if not file:
+            return {"message": 'Not a valid image'}, HTTPStatus.BAD_REQUEST
+        if not image_set.file_allowed(file, file.filename):
+            return {'message': 'File type not allowed'}, HTTPStatus.BAD_REQUEST
+        recipe = Recipe.get_by_id(recipe_id=recipe_id)
+        if not recipe:
+            return {'message': 'recipe not found'}, HTTPStatus.NOT_FOUND
+        current_user = get_jwt_identity()
+        if current_user != recipe.user_id:
+            return {'message': 'Access is not allowed'}, HTTPStatus.FORBIDDEN
+        if recipe.cover_image:
+            cover_path = image_set.path(folder='recipes', filename=recipe.cover_image)
+            if path.exists(cover_path):
+                remove(cover_path)
+        file_name = save_image(file, 'recipes')
+        recipe.cover_image = file_name
+        recipe.save()
+        return recipe_cover_schema.dump(recipe), HTTPStatus.OK
+
+
+
+
+

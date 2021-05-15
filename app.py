@@ -14,7 +14,7 @@ from extensions import db, jwt, image_set
 
 from resources.user import UserListResource, UserResource, MeResource,\
     UserRecipeListResource, UserActivateResource, UserAvatarUploadResource
-from resources.recipe import RecipeListResource, RecipeResource, RecipePublishResource
+from resources.recipe import RecipeListResource, RecipeResource, RecipePublishResource, RecipeCoverUploadResource
 from resources.token import TokenResource, RefreshResource, black_list, RevokeResource
 
 
@@ -52,6 +52,7 @@ def register_resource(app):
     api.add_resource(RecipeListResource, '/recipes')
     api.add_resource(RecipeResource, '/recipes/<int:recipe_id>')
     api.add_resource(RecipePublishResource, '/recipes/<int:recipe_id>/publish')
+    api.add_resource(RecipeCoverUploadResource, '/recipe/<int:recipe_id>/cover')
 
     api.add_resource(TokenResource, '/token')
     api.add_resource(RefreshResource, '/refresh')

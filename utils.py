@@ -31,7 +31,6 @@ def save_image(image, folder):
     return filename
 
 
-
 def compress_image(filename, folder):
     file_path = image_set.path(filename=filename, folder=folder)
     image = Image.open(file_path)
@@ -49,6 +48,3 @@ def compress_image(filename, folder):
     print(f"The file size is reduced by {percentage} %, from {original_size} to {compressed_size}")
     remove(file_path)
     return compressed_filename
-
-
-
