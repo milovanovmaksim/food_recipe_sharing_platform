@@ -13,7 +13,7 @@ from models.user import User
 from models.recipe import Recipe
 
 from schemas.user import UserSchema
-from schemas.recipe import RecipeSchema
+from schemas.recipe import RecipeSchema, RecipePaginationSchema
 
 from utils import generate_token, verify_token, save_image
 from mailgun import MailGunApi
@@ -23,7 +23,7 @@ user_schema = UserSchema()
 user_public_schema = UserSchema(exclude=('email',))
 user_avatar_schema = UserSchema(only=('avatar_url',))
 
-recipe_list_schema = RecipeSchema(many=True)
+recipe_pagination_schema = RecipePaginationSchema()
 
 mailgun = MailGunApi(domain=environ.get('MAILGUN_DOMAIN'),
                      api_key=environ.get('MAILGUN_API_KEY'))
@@ -86,17 +86,22 @@ class MeResource(Resource):
 
 class UserRecipeListResource(Resource):
     @jwt_required(optional=True)
-    @use_kwargs({'visibility': fields.Str(missing='public')}, location="query")
-    def get(self, username, visibility):
+    @use_kwargs({'visibility': fields.Str(missing='public'),
+                 'page': fields.Int(missing=1),
+                 'per_page': fields.Int(missing=4)}, location="query")
+    def get(self, username, page, per_page, visibility):
         user = User.get_by_username(username=username)
         if not user:
             return {'message', 'User not found'}, HTTPStatus.NOT_FOUND
         current_user = get_jwt_identity()
 
-        if current_user != user.id:
+        if current_user != user.id and visibility != 'public':
             visibility = 'public'
-        recipes = Recipe.get_all_by_user(user_id=user.id, visibility=visibility)
-        return recipe_list_schema.dump(recipes), HTTPStatus.OK
+        if visibility not in ['public', 'all', 'private']:
+            return {'message', 'Nothing matches the given URI'}, HTTPStatus.NOT_FOUND
+        paginated_recipes = Recipe.get_all_by_user(user_id=user.id, page=page, per_page=per_page,
+                                                   visibility=visibility)
+        return recipe_pagination_schema.dump(paginated_recipes), HTTPStatus.OK
 
 
 class UserActivateResource(Resource):
