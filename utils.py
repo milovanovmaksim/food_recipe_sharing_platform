@@ -2,12 +2,12 @@ import uuid
 from itsdangerous import URLSafeTimedSerializer
 from os import stat, remove
 
-from flask import current_app
+from flask import current_app, request
 from flask_uploads import extension
 
 from PIL import Image
 
-from extensions import image_set
+from extensions import image_set, cache
 
 
 def generate_token(email, salt=None):
@@ -48,3 +48,9 @@ def compress_image(filename, folder):
     print(f"The file size is reduced by {percentage} %, from {original_size} to {compressed_size}")
     remove(file_path)
     return compressed_filename
+
+
+def clear_cache(key_prefix):
+    print(request.path)
+    keys = [key for key in cache.cache._cache.keys() if key.startswith(key_prefix)]
+    cache.delete_many(*keys)

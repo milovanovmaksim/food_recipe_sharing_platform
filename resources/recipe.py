@@ -10,8 +10,8 @@ from webargs.flaskparser import use_kwargs
 
 from models.recipe import Recipe
 from schemas.recipe import RecipeSchema, RecipePaginationSchema
-from extensions import image_set
-from utils import save_image
+from extensions import image_set, cache
+from utils import save_image, clear_cache
 
 recipe_schema = RecipeSchema()
 recipe_cover_schema = RecipeSchema(only=('cover_url',))
@@ -25,7 +25,9 @@ class RecipeListResource(Resource):
                  'per_page': fields.Int(missing=20),
                  'sort': fields.Str(missing='created_at'),
                  'order': fields.Str(missing='desc')}, location="query")
+    @cache.cached(timeout=60, query_string=True)
     def get(self, q, page, per_page, sort, order):
+        print('Querying database....')
         if sort not in ['created_at', 'cook_time', 'num_of_servings']:
             sort = 'created_at'
         if order not in ['asc', 'desc']:
@@ -68,6 +70,8 @@ class RecipeResource(Resource):
         if current_user != recipe.user_id:
             return {'message': 'Access is not allowed'}, HTTPStatus.FORBIDDEN
         recipe.delete()
+
+        clear_cache('/recipes')
         return {}, HTTPStatus.NO_CONTENT
 
     @jwt_required()
@@ -91,6 +95,7 @@ class RecipeResource(Resource):
         recipe.directions = data.get('directions') or recipe.directions
         recipe.ingredients = data.get('ingredients') or recipe.ingredients
         recipe.save()
+        clear_cache('/recipes')
         return recipe_schema.dump(recipe), HTTPStatus.OK
 
 
@@ -106,6 +111,7 @@ class RecipePublishResource(Resource):
             return {'message': 'Access is not allowed'}, HTTPStatus.FORBIDDEN
         recipe.is_publish = True
         recipe.save()
+        clear_cache('/recipes')
         return {}, HTTPStatus.NO_CONTENT
 
     @jwt_required()
@@ -118,6 +124,7 @@ class RecipePublishResource(Resource):
             return {'message': 'Access is not allowed'}, HTTPStatus.FORBIDDEN
         recipe.is_publish = False
         recipe.save()
+        clear_cache('/recipes')
         return {}, HTTPStatus.NO_CONTENT
 
 
@@ -142,4 +149,5 @@ class RecipeCoverUploadResource(Resource):
         file_name = save_image(file, 'recipes')
         recipe.cover_image = file_name
         recipe.save()
+        clear_cache('/recipes')
         return recipe_cover_schema.dump(recipe), HTTPStatus.OK

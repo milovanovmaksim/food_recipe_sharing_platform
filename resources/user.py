@@ -2,7 +2,8 @@ import os
 from http import HTTPStatus
 from os import environ
 
-from flask import request, url_for, render_template
+
+from flask import request, url_for, render_template, jsonify
 from flask_restful import Resource
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from marshmallow import ValidationError
@@ -13,9 +14,9 @@ from models.user import User
 from models.recipe import Recipe
 
 from schemas.user import UserSchema
-from schemas.recipe import RecipeSchema, RecipePaginationSchema
+from schemas.recipe import RecipePaginationSchema
 
-from utils import generate_token, verify_token, save_image
+from utils import generate_token, verify_token, save_image, clear_cache
 from mailgun import MailGunApi
 from extensions import image_set
 
@@ -135,4 +136,5 @@ class UserAvatarUploadResource(Resource):
         filename = save_image(image=file, folder='avatars')
         user.avatar_image = filename
         user.save()
+        clear_cache('/recipes')
         return user_avatar_schema.dump(user), HTTPStatus.OK
