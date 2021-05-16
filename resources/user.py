@@ -93,13 +93,13 @@ class UserRecipeListResource(Resource):
     def get(self, username, page, per_page, visibility):
         user = User.get_by_username(username=username)
         if not user:
-            return {'message', 'User not found'}, HTTPStatus.NOT_FOUND
+            return {'message': 'User not found'}, HTTPStatus.NOT_FOUND
         current_user = get_jwt_identity()
 
         if current_user != user.id and visibility != 'public':
             visibility = 'public'
         if visibility not in ['public', 'all', 'private']:
-            return {'message', 'Nothing matches the given URI'}, HTTPStatus.NOT_FOUND
+            return {'message': 'Nothing matches the given URI'}, HTTPStatus.NOT_FOUND
         paginated_recipes = Recipe.get_all_by_user(user_id=user.id, page=page, per_page=per_page,
                                                    visibility=visibility)
         return recipe_pagination_schema.dump(paginated_recipes), HTTPStatus.OK

@@ -54,7 +54,7 @@ def register_extensions(app):
 
 
 def register_resource(app):
-    api = Api(app)
+    api = Api(app, catch_all_404s=True)
     api.add_resource(UserListResource, '/users')
     api.add_resource(UserResource, '/users/<string:username>')
     api.add_resource(UserRecipeListResource, '/users/<string:username>/recipes')
