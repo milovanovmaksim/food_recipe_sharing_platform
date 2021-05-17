@@ -51,6 +51,5 @@ def compress_image(filename, folder):
 
 
 def clear_cache(key_prefix):
-    print(request.path)
     keys = [key for key in cache.cache._cache.keys() if key.startswith(key_prefix)]
     cache.delete_many(*keys)

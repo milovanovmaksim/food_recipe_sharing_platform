@@ -3,7 +3,7 @@ from http import HTTPStatus
 from os import environ
 
 
-from flask import request, url_for, render_template, jsonify
+from flask import request, url_for, render_template
 from flask_restful import Resource
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from marshmallow import ValidationError
@@ -18,7 +18,7 @@ from schemas.recipe import RecipePaginationSchema
 
 from utils import generate_token, verify_token, save_image, clear_cache
 from mailgun import MailGunApi
-from extensions import image_set
+from extensions import image_set, limiter
 
 user_schema = UserSchema()
 user_public_schema = UserSchema(exclude=('email',))
@@ -86,6 +86,9 @@ class MeResource(Resource):
 
 
 class UserRecipeListResource(Resource):
+
+    decorators = [limiter.limit('3/minute; 30/hour; 300/day', methods=['GET'], error_message='Too Many Requests')]
+
     @jwt_required(optional=True)
     @use_kwargs({'visibility': fields.Str(missing='public'),
                  'page': fields.Int(missing=1),

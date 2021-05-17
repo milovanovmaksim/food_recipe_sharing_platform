@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask
+from flask import Flask, request
 from flask_restful import Api
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager, Shell
@@ -10,7 +10,7 @@ from models.user import User
 from models.recipe import Recipe
 
 from config import config
-from extensions import db, jwt, image_set, cache
+from extensions import db, jwt, image_set, cache, limiter
 
 from resources.user import UserListResource, UserResource, MeResource, \
     UserRecipeListResource, UserActivateResource, UserAvatarUploadResource
@@ -33,6 +33,7 @@ def register_extensions(app):
     configure_uploads(app, image_set)
     patch_request_class(app, 10 * 1024 * 1024)
     cache.init_app(app)
+    limiter.init_app(app)
 
     @jwt.token_in_blocklist_loader
     def check_if_token_in_blacklist(jwt_header, jwt_payload):
@@ -51,6 +52,10 @@ def register_extensions(app):
         print(cache.cache._cache.keys())
         print('\n==========================================\n')
         return response
+
+    @limiter.request_filter
+    def ip_whitelist():
+        return request.remote_addr == '127.0.0.1'
 
 
 def register_resource(app):
